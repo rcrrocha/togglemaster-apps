@@ -1,7 +1,66 @@
-publish:
-  runs-on: ubuntu-latest
-  ...
-  - Login to Amazon ECR
-  - Build Docker Image
-  - Tag Image
-  - Push Docker Image
+name: Auth Service CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+
+  build-test-security:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Run Tests
+        run: go test ./...
+
+      - name: Build
+        run: go build ./...
+
+      - name: Trivy Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: .
+
+  publish:
+
+    runs-on: ubuntu-latest
+
+    needs: build-test-security
+
+    steps:
+
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker Image
+        run: |
+          docker build -t auth-service:${{ github.sha }} .
+
+      - name: Tag Image
+        run: |
+          docker tag auth-service:${{ github.sha }} 574349219641.dkr.ecr.us-east-1.amazonaws.com/auth-service:${{ github.sha }}
+
+      - name: Push Docker Image
+        run: |
+          docker push 574349219641.dkr.ecr.us-east-1.amazonaws.com/auth-service:${{ github.sha }}
