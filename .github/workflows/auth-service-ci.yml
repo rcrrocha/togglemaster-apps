@@ -65,3 +65,32 @@ jobs:
       - name: Push Docker Image
         run: |
           docker push 574349219641.dkr.ecr.us-east-1.amazonaws.com/auth-service:${{ github.sha }}
+        update-gitops:
+    runs-on: ubuntu-latest
+
+    needs: publish
+
+    steps:
+      - name: Checkout GitOps Repository
+        uses: actions/checkout@v4
+        with:
+          repository: rcrrocha/togglemaster-gitops
+          token: ${{ secrets.GITOPS_TOKEN }}
+          path: gitops
+
+      - name: Update Image Tag
+        run: |
+          sed -i 's|image: .*|image: 574349219641.dkr.ecr.us-east-1.amazonaws.com/auth-service:${{ github.sha }}|g' gitops/apps/auth/deployment.yaml
+
+      - name: Commit Changes
+        run: |
+          cd gitops
+
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          git add apps/auth/deployment.yaml
+
+          git commit -m "Update auth-service image to ${{ github.sha }}" || echo "No changes"
+
+          git push
