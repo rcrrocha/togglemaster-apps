@@ -1,2 +1,2 @@
 # Analytics Service
-teste
+test: validar update-gitops
