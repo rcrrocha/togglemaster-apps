@@ -21,10 +21,12 @@ jobs:
 
       - name: Run Tests
         run: |
+          cd auth-service
           go test ./...
 
       - name: Build
         run: |
+          cd auth-service
           go build ./...
 
       - name: Trivy Scan
@@ -53,6 +55,7 @@ jobs:
 
       - name: Build Docker Image
         run: |
+          cd auth-service
           docker build -t auth-service:${{ github.sha }} .
 
       - name: Tag Image
