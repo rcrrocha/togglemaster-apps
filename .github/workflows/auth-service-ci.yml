@@ -83,12 +83,14 @@ jobs:
         run: |
           sed -i 's|image: .*|image: 574349219641.dkr.ecr.us-east-1.amazonaws.com/auth-service:${{ github.sha }}|g' gitops/apps/auth/deployment.yaml
 
-      - name: Commit Changes
+            - name: Commit Changes
         run: |
           cd gitops
 
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
+
+          git remote set-url origin https://x-access-token:${{ secrets.GITOPS_TOKEN }}@github.com/rcrrocha/togglemaster-gitops.git
 
           git add apps/auth/deployment.yaml
 
