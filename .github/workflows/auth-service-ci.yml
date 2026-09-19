@@ -94,4 +94,4 @@ jobs:
 
           git commit -m "Update auth-service image to ${{ github.sha }}" || echo "No changes"
 
-          git push
+          git push origin HEAD:main
