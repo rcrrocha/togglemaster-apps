@@ -7,7 +7,6 @@ on:
   pull_request:
 
 jobs:
-
   build-test-security:
     runs-on: ubuntu-latest
 
@@ -83,7 +82,7 @@ jobs:
         run: |
           sed -i 's|image: .*|image: 574349219641.dkr.ecr.us-east-1.amazonaws.com/auth-service:${{ github.sha }}|g' gitops/apps/auth/deployment.yaml
 
-            - name: Commit Changes
+      - name: Commit Changes
         run: |
           cd gitops
 
